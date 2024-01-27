@@ -142,5 +142,3 @@ impl Game {
         0 <= x && (x as usize) < self.width() && 0 <= y && (y as usize) < self.height()
     }
 }
-
-

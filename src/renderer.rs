@@ -54,14 +54,6 @@ impl Renderer {
     }
 
     pub fn cursor_up(&self) {
-        // println!("\\e[2J");
-        // println!("\\033[2J");
-        // println!("\\033[H");
-
-        // std::process::Command::new("clear")
-        //     .spawn()
-        //     .unwrap();
-
         print!("{}[2J", 27 as char);
     }
 }

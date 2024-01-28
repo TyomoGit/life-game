@@ -1,19 +1,20 @@
-const HORIZONTAL: char = '\u{2500}';
-const VERTICAL: char = '\u{2502}';
-const TOP_RIGHT: char = '\u{2510}';
-const TOP_LEFT: char = '\u{250c}';
-const BOTTOM_RIGHT: char = '\u{2518}';
-const BOTTOM_LEFT: char = '\u{2514}';
+const HORIZONTAL: &str = "\u{2500}\u{2500}";
+const VERTICAL: &str = " \u{2502} ";
+const TOP_RIGHT: &str = "\u{2500}\u{2510}";
+const TOP_LEFT: &str = " \u{250c}\u{2500}";
+const BOTTOM_RIGHT: &str = "\u{2500}\u{2518}";
+const BOTTOM_LEFT: &str = " \u{2514}\u{2500}";
 
 pub struct Renderer {
-    live_icon: char,
-    dead_icon: char,
+    live_icon: &'static str,
+    dead_icon: &'static str,
 
+    #[allow(dead_code)]
     screen_height: usize,
 }
 
 impl Renderer {
-    pub fn new(live_icon: char, dead_icon: char, board: &[Vec<bool>]) -> Self {
+    pub fn new(live_icon: &'static str, dead_icon: &'static str, board: &[Vec<bool>]) -> Self {
         Self {
             live_icon,
             dead_icon,
@@ -36,7 +37,9 @@ impl Renderer {
                     (0, _) => HORIZONTAL,
                     (y, _) if y == height + 1 => HORIZONTAL,
                     (_, 0) => VERTICAL,
-                    (_, x) if x == width + 1 => VERTICAL,
+                    (_, x) if x == width + 1 => {
+                        VERTICAL
+                    },
 
                     _ => {
                         if board[y - 1][x - 1] {
@@ -44,10 +47,11 @@ impl Renderer {
                         } else {
                             self.dead_icon
                         }
+
                     }
                 };
 
-                print!("{} ", cell);
+                print!("{}", cell);
             }
             println!();
         }

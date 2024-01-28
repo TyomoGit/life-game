@@ -1,13 +1,15 @@
-use rand::{random, thread_rng, Rng};
+use std::collections::VecDeque;
 
-#[derive(Debug, Clone)]
+use rand::{thread_rng, Rng};
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Board {
     board: Vec<Vec<bool>>,
 }
 
 impl Board {
     pub fn new(board: Vec<Vec<bool>>) -> Self {
-        Self { board: board }
+        Self { board }
     }
 
     pub fn height(&self) -> usize {
@@ -36,34 +38,37 @@ impl Board {
 }
 
 pub struct Game {
+    pub init_board: Board,
+
     board: Board,
     buffer: Board,
+
+    prevs: VecDeque<Board>,
+    prevs_max_length: usize,
+
     is_torus: bool,
-    width: usize,
-    height: usize,
+    epochs: usize,
 }
 
 impl Game {
-    pub fn empty(width: usize, height: usize, is_torus: bool) -> Self {
-        let board = Board::new(vec![vec![false; width]; height]);
-        Self {
-            board: board.clone(),
-            buffer: board,
-            is_torus,
-            width,
-            height,
-        }
-    }
+    // pub fn empty(width: usize, height: usize, is_torus: bool) -> Self {
+    //     let board = Board::new(vec![vec![false; width]; height]);
+    //     Self {
+    //         board: board.clone(),
+    //         buffer: board,
+    //         is_torus,
+    //     }
+    // }
 
     pub fn new(board: Board, is_torus: bool) -> Self {
-        let width = board.width();
-        let height = board.height();
         Self {
             board: board.clone(),
-            buffer: board,
+            buffer: board.clone(),
             is_torus,
-            width,
-            height,
+            init_board: board.clone(),
+            prevs: VecDeque::new(),
+            prevs_max_length: 10usize.pow(2),
+            epochs: 0,
         }
     }
 
@@ -78,11 +83,13 @@ impl Game {
         }
 
         Self {
+            init_board: board.clone(),
             board: board.clone(),
-            buffer: board,
+            buffer: board.clone(),
+            prevs: VecDeque::new(),
+            prevs_max_length: 10usize.pow(5),
             is_torus,
-            width,
-            height,
+            epochs: 0,
         }
     }
 
@@ -96,6 +103,31 @@ impl Game {
 
     pub fn board(&self) -> &Vec<Vec<bool>> {
         self.board.board()
+    }
+
+    pub fn epochs(&self) -> usize {
+        self.epochs
+    }
+
+    fn is_dead(&self) -> bool {
+        for elem in &self.prevs {
+            if *elem == self.board {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    pub fn step_until_dead(&mut self) {
+        while !self.is_dead() && self.epochs < self.prevs_max_length {
+            self.prevs.push_back(self.board.clone());
+            if self.prevs.len() > self.prevs_max_length {
+                self.prevs.pop_front();
+            }
+
+            self.step();
+        }
     }
 
     pub fn step(&mut self) {
@@ -113,6 +145,7 @@ impl Game {
             }
         }
         self.board = self.buffer.clone();
+        self.epochs += 1;
     }
 
     fn count_neighbors(&self, x: usize, y: usize) -> usize {

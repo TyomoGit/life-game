@@ -47,13 +47,13 @@ impl Renderer {
                     }
                 };
 
-                print!("{}", cell);
+                print!("{} ", cell);
             }
             println!();
         }
     }
 
-    pub fn cursor_up(&self) {
+    pub fn clear(&self) {
         print!("{}[2J", 27 as char);
     }
 }

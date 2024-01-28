@@ -44,8 +44,20 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(width: usize, height: usize, is_torus: bool) -> Self {
+    pub fn empty(width: usize, height: usize, is_torus: bool) -> Self {
         let board = Board::new(vec![vec![false; width]; height]);
+        Self {
+            board: board.clone(),
+            buffer: board,
+            is_torus,
+            width,
+            height,
+        }
+    }
+
+    pub fn new(board: Board, is_torus: bool) -> Self {
+        let width = board.width();
+        let height = board.height();
         Self {
             board: board.clone(),
             buffer: board,
@@ -91,7 +103,7 @@ impl Game {
             for x in 0..self.width() {
                 let neighbor_count = self.count_neighbors(x, y);
 
-                if self.board.get(x, y).unwrap() {
+                if self.buffer.get(x, y).unwrap() {
                     if !(neighbor_count == 2 || neighbor_count == 3) {
                         self.buffer.set(x, y, false);
                     }
@@ -126,8 +138,8 @@ impl Game {
                     count += 1;
                 }
             } else if self.is_torus {
-                let x = x as usize % self.width();
-                let y = y as usize % self.height();
+                let x = (x.rem_euclid(self.width() as i32))as usize;
+                let y = (y.rem_euclid(self.height() as i32))as usize;
 
                 if self.board.get(x, y).unwrap() {
                     count += 1;

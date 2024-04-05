@@ -1,6 +1,5 @@
 use std::time;
 use getch::Getch;
-use proconio::input;
 
 use game::Game;
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
@@ -38,7 +37,7 @@ fn main() {
     let mut queue: Vec<Game> = Vec::new();
 
     for _ in 0..10usize.pow(3) {
-        queue.push(Game::new_random(120, 55, true));
+        queue.push(Game::new_random(40, 40, true));
     }
 
     queue.par_iter_mut()
@@ -50,28 +49,28 @@ fn main() {
         .max_by(|a, b| a.epochs().cmp(&b.epochs()))
         .unwrap();
 
-    let min_game = queue.iter()
-        .min_by(|a, b| a.epochs().cmp(&b.epochs()))
-        .unwrap();
+    // let min_game = queue.iter()
+    //     .min_by(|a, b| a.epochs().cmp(&b.epochs()))
+    //     .unwrap();
 
     let renderer = Renderer::new("\u{25A0} ", "  ", max_game.board());
     renderer.render(max_game.board());
     renderer.render(max_game.init_board.board());
     println!("epochs: {}", max_game.epochs());
 
-    Getch::new()
-        .getch()
-        .expect("Failed to get input");
+    // Getch::new()
+    //     .getch()
+    //     .expect("Failed to get input");
 
-    let mut game = Game::new(min_game.init_board.clone(), true);
-    for _ in 0..min_game.epochs() {
-        renderer.render(game.board());
-        println!("{} / {}", game.epochs(), max_game.epochs());
+    // let mut game = Game::new(min_game.init_board.clone(), true);
+    // for _ in 0..min_game.epochs() {
+    //     renderer.render(game.board());
+    //     println!("{} / {}", game.epochs(), max_game.epochs());
 
-        game.step();
-        std::thread::sleep(time::Duration::from_millis(100));
-        renderer.clear();
-    }
+    //     game.step();
+    //     std::thread::sleep(time::Duration::from_millis(100));
+    //     renderer.clear();
+    // }
 
     Getch::new()
         .getch()

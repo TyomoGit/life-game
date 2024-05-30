@@ -2,6 +2,8 @@ use std::collections::VecDeque;
 
 use rand::{thread_rng, Rng};
 
+const PREVS_MAX_LENGTH: usize = 10_usize.pow(4);
+
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Board {
     board: Vec<Vec<bool>>,
@@ -51,15 +53,6 @@ pub struct Game {
 }
 
 impl Game {
-    // pub fn empty(width: usize, height: usize, is_torus: bool) -> Self {
-    //     let board = Board::new(vec![vec![false; width]; height]);
-    //     Self {
-    //         board: board.clone(),
-    //         buffer: board,
-    //         is_torus,
-    //     }
-    // }
-
     pub fn new(board: Board, is_torus: bool) -> Self {
         Self {
             board: board.clone(),
@@ -67,7 +60,7 @@ impl Game {
             is_torus,
             init_board: board.clone(),
             prevs: VecDeque::new(),
-            prevs_max_length: 10usize.pow(2),
+            prevs_max_length: PREVS_MAX_LENGTH,
             epochs: 0,
         }
     }
@@ -87,7 +80,7 @@ impl Game {
             board: board.clone(),
             buffer: board.clone(),
             prevs: VecDeque::new(),
-            prevs_max_length: 10usize.pow(5),
+            prevs_max_length: PREVS_MAX_LENGTH,
             is_torus,
             epochs: 0,
         }
@@ -111,7 +104,7 @@ impl Game {
 
     fn is_dead(&self) -> bool {
         for elem in &self.prevs {
-            if *elem == self.board {
+            if elem == &self.board {
                 return true;
             }
         }
@@ -120,7 +113,7 @@ impl Game {
     }
 
     pub fn step_until_dead(&mut self) {
-        while !self.is_dead() && self.epochs < self.prevs_max_length {
+        while !self.is_dead() {
             self.prevs.push_back(self.board.clone());
             if self.prevs.len() > self.prevs_max_length {
                 self.prevs.pop_front();

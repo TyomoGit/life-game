@@ -2,6 +2,7 @@ use std::time;
 use getch::Getch;
 
 use game::Game;
+use indicatif::ProgressBar;
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use renderer::Renderer;
 
@@ -28,6 +29,10 @@ mod renderer;
 //     help: Option<bool>,
 // }
 
+const WIDTH: usize = 40;
+const HEIGHT: usize = 40;
+const N_LOOPS: usize = 10usize.pow(5);
+
 fn main() {
     // let args = Arguments::parse();
 
@@ -36,13 +41,19 @@ fn main() {
 
     let mut queue: Vec<Game> = Vec::new();
 
-    for _ in 0..10usize.pow(3) {
-        queue.push(Game::new_random(40, 40, true));
+    let bar_pre = ProgressBar::new(N_LOOPS as u64);
+    for _ in 0..N_LOOPS {
+        queue.push(Game::new_random(WIDTH, HEIGHT, true));
+        bar_pre.inc(1);
     }
+    bar_pre.finish();
+
+    let bar = ProgressBar::new(queue.len() as u64);
 
     queue.par_iter_mut()
         .for_each(|game| {
             game.step_until_dead();
+            bar.inc(1);
         });
 
     let max_game = queue.iter()
@@ -76,7 +87,12 @@ fn main() {
         .getch()
         .expect("Failed to get input");
 
-    let mut game = Game::new(max_game.init_board.clone(), true);
+    let mut game = Game::new(max_game.init_board.clone(), false);
+
+    // for _ in 0..max_game.epochs() {
+    //     game.step();
+    // }
+
     loop {
 
         renderer.render(game.board());
